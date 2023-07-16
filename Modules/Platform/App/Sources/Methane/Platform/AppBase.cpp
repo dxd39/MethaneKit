@@ -173,9 +173,10 @@ AppBase::~AppBase()
         m_parallel_executor_ptr->wait_for_all();
 }
 
-int AppBase::Run(const RunArgs& args)
+int AppBase::Run([[maybe_unused]]const RunArgs& args)
 {
     META_FUNCTION_TASK();
+#ifndef __ANDROID__
     try
     {
         parse(args.cmd_arg_count, args.cmd_arg_values);
@@ -190,6 +191,7 @@ int AppBase::Run(const RunArgs& args)
         std::cerr << "Failed to parse command line:" << std::endl; // NOSONAR
         return exit(e);
     }
+#endif
     return 0;
 }
 

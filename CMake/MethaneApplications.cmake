@@ -148,6 +148,12 @@ function(add_methane_application)
 
         source_group("Resources" FILES ${PLIST_FILE_PATH} ${ICON_FILE_PATH})
 
+    elseif(ANDROID)
+
+        add_library(${APP_TARGET} SHARED
+            ${APP_SOURCES}
+        )
+
     else() # Linux
 
         add_executable(${APP_TARGET}

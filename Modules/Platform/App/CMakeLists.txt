@@ -51,6 +51,23 @@ elseif(APPLE)
         ${SOURCES_PLATFORM_OS_DIR}/AppViewController.mm
     )
 
+elseif(ANDROID)
+    list(APPEND PLATFORM_HEADERS
+        ${INCLUDE_PLATFORM_OS_DIR}/AppAndroid.h
+    )
+
+    list(APPEND PLATFORM_SOURCES
+        ${SOURCES_PLATFORM_OS_DIR}/AppAndroid.cpp
+    )
+
+    # Include the GameActivity static lib to the project.
+    find_package(game-activity REQUIRED CONFIG)
+    list(APPEND PLATFORM_PUBLIC_LIBRARIES
+        game-activity::game-activity_static
+        android
+        log
+    )
+
 else(LINUX)
 
     list(APPEND PLATFORM_HEADERS
@@ -96,6 +113,7 @@ target_link_libraries(${TARGET}
         MethaneDataTypes
         MethanePlatformAppView
         MethanePlatformInputActionControllers
+        ${PLATFORM_PUBLIC_LIBRARIES}
     PRIVATE
         MethaneBuildOptions
         MethaneCommonPrecompiledHeaders

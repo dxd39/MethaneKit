@@ -26,6 +26,8 @@ Platform application interface.
 #include <Methane/Data/Types.h>
 #include <string>
 
+struct android_app;
+
 namespace Methane::Data
 {
     struct IProvider;
@@ -51,8 +53,12 @@ struct AppSettings
 
 struct AppRunArgs
 {
+#ifdef __ANDROID__
+    android_app* app = nullptr;
+#else
     int          cmd_arg_count  = 0;
     const char** cmd_arg_values = nullptr;
+#endif
 };
 
 struct AppMessage

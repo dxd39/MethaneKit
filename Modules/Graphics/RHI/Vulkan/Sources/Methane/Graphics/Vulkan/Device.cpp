@@ -67,7 +67,9 @@ static const std::vector<std::string_view> g_common_device_extensions{
 };
 
 static const std::vector<std::string_view> g_render_device_extensions{
+#ifndef __ANDROID__
     VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME
+#endif
 };
 
 static const std::vector<std::string_view> g_present_device_extensions = {

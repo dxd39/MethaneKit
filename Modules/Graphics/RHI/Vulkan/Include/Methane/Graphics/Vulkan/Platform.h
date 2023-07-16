@@ -38,6 +38,7 @@ public:
     Platform() = delete;
 
     static const std::vector<std::string_view>& GetVulkanInstanceRequiredExtensions();
+    static const std::vector<std::string_view>& GetVulkanInstanceRequiredLayers();
     static vk::UniqueSurfaceKHR CreateVulkanSurfaceForWindow(const vk::Instance& instance, const Methane::Platform::AppEnvironment& app_env);
 
 private:

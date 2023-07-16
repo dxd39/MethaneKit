@@ -53,6 +53,13 @@ if(APPLE)
     )
 endif()
 
+if(ANDROID)
+    target_link_libraries(${TARGET}
+        PRIVATE
+            android
+    )
+endif()
+
 target_compile_definitions(${TARGET}
     PUBLIC
         $<$<BOOL:${METHANE_SCOPE_TIMERS_ENABLED}>:METHANE_SCOPE_TIMERS_ENABLED>

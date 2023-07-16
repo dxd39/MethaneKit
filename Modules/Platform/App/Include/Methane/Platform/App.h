@@ -35,6 +35,10 @@ Methane platform application alias.
 #include <Methane/Platform/iOS/AppIOS.hh>
 #endif
 
+#elif __ANDROID__
+
+#include <Methane/Platform/Android/AppAndroid.h>
+
 #elif defined __linux__
 
 #include <Methane/Platform/Linux/AppLin.h>
@@ -55,6 +59,10 @@ using App = AppMac;
 #else
 using App = AppIOS;
 #endif
+
+#elif __ANDROID__
+
+using App = AppAndroid;
 
 #elif defined __linux__
 

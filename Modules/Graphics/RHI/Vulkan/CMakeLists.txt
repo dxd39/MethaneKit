@@ -109,7 +109,7 @@ target_link_libraries(${TARGET}
     PUBLIC
         MethaneGraphicsRhiBase
         # Vulkan Libs
-        $<$<NOT:$<BOOL:${APPLE}>>:Vulkan-Headers> # Lin/Win: Dynamic linking with Vulkan, only Vulkan headers are needed
+        $<$<NOT:$<BOOL:${APPLE}>>:Vulkan-Headers> # Lin/Win/Android: Dynamic linking with Vulkan, only Vulkan headers are needed
         $<$<BOOL:${APPLE}>:Vulkan::Vulkan>        # MacOS: Link statically with Molten framework on MacOS
         $<$<BOOL:${LINUX}>:dl> # Linux: Link with dynamic linker for vk::DynamicLoader on Linux
     PRIVATE
@@ -147,6 +147,7 @@ target_compile_definitions(${TARGET}
         $<$<BOOL:${WIN32}>:VK_USE_PLATFORM_WIN32_KHR>
         $<$<BOOL:${APPLE}>:VK_USE_PLATFORM_METAL_EXT>
         $<$<BOOL:${LINUX}>:VK_USE_PLATFORM_XCB_KHR>
+        $<$<BOOL:${ANDROID}>:VK_USE_PLATFORM_ANDROID_KHR>
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADERS} ${SOURCES})

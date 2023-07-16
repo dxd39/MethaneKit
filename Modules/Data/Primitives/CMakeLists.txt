@@ -37,7 +37,7 @@ target_link_libraries(${TARGET}
         MethaneDataTypes
 )
 
-if (UNIX)
+if (UNIX AND NOT ANDROID)
 
     target_link_libraries(${TARGET}
         PRIVATE

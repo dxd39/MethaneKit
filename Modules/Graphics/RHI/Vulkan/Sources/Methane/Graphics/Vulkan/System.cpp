@@ -95,7 +95,7 @@ static std::vector<char const*> GetEnabledLayers(const std::vector<std::string_v
     return enabled_layers;
 }
 
-static std::vector<const char*> GetEnabledExtensions(const std::vector<std::string_view>& extensions)
+static std::vector<const char*> GetEnabledExtensions(const std::vector<std::string_view>& extensions, const std::vector<const char*>& enabled_layers)
 {
     META_FUNCTION_TASK();
 
@@ -111,14 +111,31 @@ static std::vector<const char*> GetEnabledExtensions(const std::vector<std::stri
         enabled_extensions.push_back(ext.data() );
     }
 
-    const auto add_enabled_extension = [&extensions, &enabled_extensions, &extension_properties](const std::string& extension)
+    const auto add_enabled_extension = [&extensions, &enabled_layers, &enabled_extensions, &extension_properties](const std::string& extension)
     {
         if (std::find(extensions.begin(), extensions.end(), extension) == extensions.end() &&
             std::find_if(extension_properties.begin(), extension_properties.end(),
                          [&extension](const vk::ExtensionProperties& ep) { return extension == ep.extensionName; }
             ) != extension_properties.end())
         {
-            enabled_extensions.push_back(extension.c_str());
+            enabled_extensions.push_back(extension.data());
+        }
+        else
+        {
+            // Also check the layers extension.
+            for (auto layer : enabled_layers) 
+            {
+                const std::vector<vk::ExtensionProperties>& layer_extension_properties = vk::enumerateInstanceExtensionProperties(std::string(layer));
+
+                if (std::find(extensions.begin(), extensions.end(), extension) == extensions.end() &&
+                    std::find_if(layer_extension_properties.begin(), layer_extension_properties.end(),
+                        [&extension](const vk::ExtensionProperties& ep) { return extension == ep.extensionName; }
+                    ) != layer_extension_properties.end())
+                {
+                    enabled_extensions.push_back(extension.data());
+                    break;
+                }
+            }
         }
     };
 
@@ -266,7 +283,7 @@ static vk::UniqueInstance CreateVulkanInstance(const vk::DynamicLoader& vk_loade
 
     constexpr uint32_t engine_version = METHANE_VERSION_MAJOR * 10 + METHANE_VERSION_MINOR;
     const std::vector<const char*> enabled_layers     = GetEnabledLayers(layers);
-    const std::vector<const char*> enabled_extensions = GetEnabledExtensions(extensions);
+    const std::vector<const char*> enabled_extensions = GetEnabledExtensions(extensions, enabled_layers);
     const vk::ApplicationInfo vk_app_info(g_vk_app_name.c_str(), 1, g_vk_engine_name.c_str(), engine_version, vk_api_version);
     const vk::InstanceCreateInfo vk_instance_create_info = MakeInstanceCreateInfoChain(vk_app_info, vk_instance_create_flags,
                                                                                        enabled_layers, enabled_extensions).get<vk::InstanceCreateInfo>();
@@ -277,7 +294,7 @@ static vk::UniqueInstance CreateVulkanInstance(const vk::DynamicLoader& vk_loade
 }
 
 System::System()
-    : m_vk_unique_instance(CreateVulkanInstance(m_vk_loader, {}, Platform::GetVulkanInstanceRequiredExtensions(), VK_API_VERSION_1_1))
+    : m_vk_unique_instance(CreateVulkanInstance(m_vk_loader, Platform::GetVulkanInstanceRequiredLayers(), Platform::GetVulkanInstanceRequiredExtensions(), VK_API_VERSION_1_1))
 #ifndef NDEBUG
     , m_vk_unique_debug_utils_messanger(m_vk_unique_instance.get().createDebugUtilsMessengerEXTUnique(MakeDebugUtilsMessengerCreateInfoEXT()))
 #endif
@@ -310,6 +327,8 @@ const Ptrs<Rhi::IDevice>& System::UpdateGpuDevices(const Methane::Platform::AppE
     if (m_vk_unique_surface)
     {
         // When devices are created, temporary surface can be released
+        // Fix android surface "already connected"
+        GetNativeInstance().destroySurfaceKHR(m_vk_unique_surface.get(), nullptr);
         m_vk_unique_surface.release();
     }
     return gpu_devices;

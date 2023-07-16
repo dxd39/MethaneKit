@@ -310,6 +310,20 @@ vk::Extent2D RenderContext::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR& s
     );
 }
 
+vk::CompositeAlphaFlagBitsKHR RenderContext::ChooseCompositeAlpha(const vk::SurfaceCapabilitiesKHR& surface_caps) const
+{
+    const std::vector<vk::CompositeAlphaFlagBitsKHR> composite_alpha_flags =
+    {
+        vk::CompositeAlphaFlagBitsKHR::eOpaque,
+        vk::CompositeAlphaFlagBitsKHR::ePreMultiplied,
+        vk::CompositeAlphaFlagBitsKHR::ePreMultiplied,
+        vk::CompositeAlphaFlagBitsKHR::eInherit,
+    };
+    return *std::find_if(composite_alpha_flags.begin(), composite_alpha_flags.end(),
+        [surface_caps](const vk::CompositeAlphaFlagBitsKHR f) { return f & surface_caps.supportedCompositeAlpha; }
+    );
+}
+
 void RenderContext::InitializeNativeSwapchain()
 {
     META_FUNCTION_TASK();
@@ -320,10 +334,11 @@ void RenderContext::InitializeNativeSwapchain()
         throw Rhi::IContext::IncompatibleException("Device does not support presentation to the window surface.");
     }
 
-    const Device::SwapChainSupport swap_chain_support  = GetVulkanDevice().GetSwapChainSupportForSurface(GetNativeSurface());
-    const vk::SurfaceFormatKHR       swap_surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
-    const vk::PresentModeKHR         swap_present_mode   = ChooseSwapPresentMode(swap_chain_support.present_modes);
-    const vk::Extent2D               swap_extent         = ChooseSwapExtent(swap_chain_support.capabilities);
+    const Device::SwapChainSupport       swap_chain_support   = GetVulkanDevice().GetSwapChainSupportForSurface(GetNativeSurface());
+    const vk::SurfaceFormatKHR           swap_surface_format  = ChooseSwapSurfaceFormat(swap_chain_support.formats);
+    const vk::PresentModeKHR             swap_present_mode    = ChooseSwapPresentMode(swap_chain_support.present_modes);
+    const vk::Extent2D                   swap_extent          = ChooseSwapExtent(swap_chain_support.capabilities);
+    const vk::CompositeAlphaFlagBitsKHR  swap_composite_alpha = ChooseCompositeAlpha(swap_chain_support.capabilities);
 
     uint32_t image_count = std::max(swap_chain_support.capabilities.minImageCount, GetSettings().frame_buffers_count);
     if (swap_chain_support.capabilities.maxImageCount && image_count > swap_chain_support.capabilities.maxImageCount)
@@ -343,7 +358,7 @@ void RenderContext::InitializeNativeSwapchain()
             vk::ImageUsageFlagBits::eColorAttachment,
             vk::SharingMode::eExclusive, 0, nullptr,
             swap_chain_support.capabilities.currentTransform,
-            vk::CompositeAlphaFlagBitsKHR::eOpaque,
+            swap_composite_alpha,
             swap_present_mode,
             true
         )

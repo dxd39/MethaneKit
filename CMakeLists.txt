@@ -43,6 +43,11 @@ if(APPLE)
     endif()
 endif()
 
+if(ANDROID)
+    set(DEFAULT_PRECOMPILED_HEADERS_ENABLED OFF)
+    set(DEFAULT_TESTS_BUILD_ENABLED OFF)
+endif()
+
 if (CMAKE_BUILD_TYPE EQUAL "Release" OR
     CMAKE_BUILD_TYPE EQUAL "RelWithDebInfo")
     # Methane RHI PIMPL calls to final API implementation is enabled in Release builds only,

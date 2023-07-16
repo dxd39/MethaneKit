@@ -82,6 +82,15 @@ elseif(APPLE)
         message(FATAL_ERROR "Methane Kit does not support Apple system: ${CMAKE_SYSTEM_NAME}")
     endif()
 
+elseif(ANDROID)
+
+    set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+    
+    set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -u \
+        Java_com_google_androidgamesdk_GameActivity_initializeNativeCode")
+
 else(UNIX)
 
 endif()

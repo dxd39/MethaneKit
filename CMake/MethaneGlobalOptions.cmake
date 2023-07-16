@@ -98,6 +98,9 @@ elseif(APPLE)
         # - VK_LAYER_PATH=$USER_HOME$/VulkanSDK/1.2.182.0/macOS/share/vulkan/explicit_layer.d
     endif()
 
+elseif(ANDROID)
+        # To Do
+
 else(UNIX)
 
     set(LINUX 1)

@@ -48,6 +48,9 @@ function(get_platform_os_dir PLATFORM_DIR CPP_EXT)
             set(${PLATFORM_DIR} iOS PARENT_SCOPE)
         endif()
         set(${CPP_EXT} mm PARENT_SCOPE)
+    elseif(ANDROID)
+        set(${PLATFORM_DIR} Android PARENT_SCOPE)
+        set(${CPP_EXT} cpp PARENT_SCOPE)
     else()
         set(${PLATFORM_DIR} Linux PARENT_SCOPE)
         set(${CPP_EXT} cpp PARENT_SCOPE)
@@ -78,7 +81,7 @@ endfunction()
 function(get_native_graphics_apis)
     set(METHANE_GFX_METAL 1 PARENT_SCOPE)   # MacOS default API
     set(METHANE_GFX_DIRECTX 2 PARENT_SCOPE) # Windows default API
-    set(METHANE_GFX_VULKAN 3 PARENT_SCOPE)  # Linux default API
+    set(METHANE_GFX_VULKAN 3 PARENT_SCOPE)  # Linux/Android default API
 endfunction()
 
 function(get_default_graphics_api GRAPHICS_API)
@@ -90,6 +93,8 @@ function(get_default_graphics_api GRAPHICS_API)
             set(${GRAPHICS_API} ${METHANE_GFX_DIRECTX} PARENT_SCOPE)
         elseif(APPLE)
             set(${GRAPHICS_API} ${METHANE_GFX_METAL} PARENT_SCOPE)
+        elseif(ANDROID)
+            set(${GRAPHICS_API} ${METHANE_GFX_VULKAN} PARENT_SCOPE)
         elseif(UNIX)
             set(${GRAPHICS_API} ${METHANE_GFX_VULKAN} PARENT_SCOPE)
         else()

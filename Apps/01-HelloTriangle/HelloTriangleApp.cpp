@@ -119,7 +119,14 @@ public:
     }
 };
 
+# ifdef __ANDROID__
+extern "C" void android_main(struct android_app* app)
+{
+    HelloTriangleApp().Run({ app });
+}
+# else
 int main(int argc, const char* argv[])
 {
     return HelloTriangleApp().Run({ argc, argv });
 }
+# endif

@@ -35,6 +35,10 @@ Methane application environment.
 #include "iOS/AppEnvironment.hh"
 #endif
 
+#elif defined __ANDROID__
+
+#include "Android/AppEnvironment.h"
+
 #elif defined __linux__
 
 #include "Linux/AppEnvironment.h"

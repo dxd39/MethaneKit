@@ -31,6 +31,12 @@ Vulkan platform dependent functions for MacOS.
 namespace Methane::Graphics::Vulkan
 {
 
+const std::vector<std::string_view>& Platform::GetVulkanInstanceRequiredLayers()
+{
+    static const std::vector<std::string_view> s_instance_layers = {};
+    return s_instance_layers;
+}
+
 const std::vector<std::string_view>& Platform::GetVulkanInstanceRequiredExtensions()
 {
     META_FUNCTION_TASK();

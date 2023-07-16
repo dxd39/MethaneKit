@@ -31,6 +31,10 @@ Platform abstraction of keyboard events.
 
 #include "MacOS/Keyboard.h"
 
+#elif defined __ANDROID__
+
+#include "Android/Keyboard.h"
+
 #else
 
 #include "Linux/Keyboard.h"
