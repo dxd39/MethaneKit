@@ -68,7 +68,7 @@ void RenderCommandList::Reset(IDebugGroup* debug_group_ptr)
     if (m_render_pass_ptr)
     {
         META_LOG("{}", static_cast<std::string>(m_render_pass_ptr->GetPattern().GetSettings()));
-        m_drawing_state.render_pass_attachments_ptr = m_render_pass_ptr->GetNonFrameBufferAttachmentTextures();
+        m_drawing_state.render_pass_attachment_ptrs = m_render_pass_ptr->GetNonFrameBufferAttachmentTextures();
     }
 }
 
@@ -111,13 +111,16 @@ void RenderCommandList::SetRenderState(Rhi::IRenderState& render_state, Rhi::Ren
     changed_states |= ~m_drawing_state.render_state_groups;
 
     auto& render_state_base = static_cast<RenderState&>(render_state);
-    render_state_base.Apply(*this, changed_states & state_groups);
+    if (!render_state_base.IsDeferred())
+    {
+        render_state_base.Apply(*this, changed_states & state_groups);
+    }
 
     Ptr<Object> render_state_object_ptr = render_state_base.GetBasePtr();
     m_drawing_state.render_state_ptr = std::static_pointer_cast<RenderState>(render_state_object_ptr);
     m_drawing_state.render_state_groups |= state_groups;
 
-    if (render_state_changed)
+    if (render_state_changed && !render_state_base.IsDeferred())
     {
         RetainResource(render_state_object_ptr);
     }
@@ -266,7 +269,7 @@ void RenderCommandList::ResetCommandState()
 
     CommandList::ResetCommandState();
 
-    m_drawing_state.render_pass_attachments_ptr.clear();
+    m_drawing_state.render_pass_attachment_ptrs.clear();
     m_drawing_state.render_state_ptr.reset();
     m_drawing_state.vertex_buffer_set_ptr.reset();
     m_drawing_state.index_buffer_ptr.reset();
@@ -280,11 +283,18 @@ void RenderCommandList::UpdateDrawingState(Primitive primitive_type)
 {
     META_FUNCTION_TASK();
     DrawingState& drawing_state = GetDrawingState();
-    if (drawing_state.primitive_type_opt && *drawing_state.primitive_type_opt == primitive_type)
-        return;
+    if (!drawing_state.primitive_type_opt || *drawing_state.primitive_type_opt == primitive_type)
+    {
+        drawing_state.changes |= DrawingState::Change::PrimitiveType;
+        drawing_state.primitive_type_opt = primitive_type;
+    }
 
-    drawing_state.changes |= DrawingState::Change::PrimitiveType;
-    drawing_state.primitive_type_opt = primitive_type;
+    if (m_drawing_state.render_state_ptr && m_drawing_state.render_state_ptr->IsDeferred())
+    {
+        m_drawing_state.render_state_ptr->Apply(*this, m_drawing_state.render_state_groups);
+        RetainResource(m_drawing_state.render_state_ptr);
+        m_drawing_state.render_state_groups = {};
+    }
 }
 
 void RenderCommandList::ValidateDrawVertexBuffers(uint32_t draw_start_vertex, uint32_t draw_vertex_count) const

@@ -48,20 +48,6 @@ Ptr<Rhi::IRenderCommandList> RenderCommandList::CreateForSynchronization(Rhi::IC
 namespace Methane::Graphics::Vulkan
 {
 
-vk::PrimitiveTopology GetVulkanPrimitiveTopology(Rhi::RenderPrimitive primitive_type)
-{
-    META_FUNCTION_TASK();
-    switch(primitive_type)
-    {
-    case Rhi::RenderPrimitive::Point:           return vk::PrimitiveTopology::ePointList;
-    case Rhi::RenderPrimitive::Line:            return vk::PrimitiveTopology::eLineList;
-    case Rhi::RenderPrimitive::LineStrip:       return vk::PrimitiveTopology::eLineStrip;
-    case Rhi::RenderPrimitive::Triangle:        return vk::PrimitiveTopology::eTriangleList;
-    case Rhi::RenderPrimitive::TriangleStrip:   return vk::PrimitiveTopology::eTriangleStrip;
-    default:                               META_UNEXPECTED_ARG_RETURN(primitive_type, vk::PrimitiveTopology::ePointList);
-    }
-}
-
 static vk::IndexType GetVulkanIndexTypeByStride(Data::Size index_stride_bytes)
 {
     META_FUNCTION_TASK();
@@ -86,10 +72,12 @@ static vk::CommandBufferInheritanceInfo CreateRenderCommandBufferInheritanceInfo
 
 RenderCommandList::RenderCommandList(CommandQueue& command_queue)
     : CommandList(vk::CommandBufferInheritanceInfo(), command_queue)
+    , m_is_dynamic_state_supported(GetVulkanCommandQueue().GetVulkanDevice().IsDynamicStateSupported())
 { }
 
 RenderCommandList::RenderCommandList(CommandQueue& command_queue, RenderPass& render_pass)
     : CommandList(CreateRenderCommandBufferInheritanceInfo(render_pass), command_queue, render_pass)
+    , m_is_dynamic_state_supported(GetVulkanCommandQueue().GetVulkanDevice().IsDynamicStateSupported())
 {
     META_FUNCTION_TASK();
     static_cast<Data::IEmitter<IRenderPassCallback>&>(render_pass).Connect(*this);
@@ -97,6 +85,7 @@ RenderCommandList::RenderCommandList(CommandQueue& command_queue, RenderPass& re
 
 RenderCommandList::RenderCommandList(ParallelRenderCommandList& parallel_render_command_list, bool is_beginning_cmd_list)
     : CommandList(CreateRenderCommandBufferInheritanceInfo(parallel_render_command_list.GetVulkanPass()), parallel_render_command_list, is_beginning_cmd_list)
+    , m_is_dynamic_state_supported(GetVulkanCommandQueue().GetVulkanDevice().IsDynamicStateSupported())
 {
     META_FUNCTION_TASK();
     static_cast<Data::IEmitter<IRenderPassCallback>&>(parallel_render_command_list.GetVulkanPass()).Connect(*this);
@@ -211,9 +200,10 @@ void RenderCommandList::UpdatePrimitiveTopology(Primitive primitive)
 {
     META_FUNCTION_TASK();
     if (DrawingState& drawing_state = GetDrawingState();
+        m_is_dynamic_state_supported &&
         drawing_state.changes.HasAnyBit(DrawingState::Change::PrimitiveType))
     {
-        const vk::PrimitiveTopology vk_primitive_topology = GetVulkanPrimitiveTopology(primitive);
+        const vk::PrimitiveTopology vk_primitive_topology = RenderState::GetVulkanPrimitiveTopology(primitive);
         GetNativeCommandBufferDefault().setPrimitiveTopologyEXT(vk_primitive_topology);
         drawing_state.changes.SetBitOff(DrawingState::Change::PrimitiveType);
     }
