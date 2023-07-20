@@ -34,6 +34,15 @@ const std::vector<std::string_view>& Platform::GetVulkanInstanceRequiredLayers()
     return s_instance_layers;
 }
 
+const std::vector<std::string_view>& Platform::GetVulkanInstanceRequiredExtensions()
+{
+    META_FUNCTION_TASK();
+    static const std::vector<std::string_view> s_instance_extensions = GetPlatformInstanceExtensions({
+        VK_KHR_XCB_SURFACE_EXTENSION_NAME
+        });
+    return s_instance_extensions;
+}
+
 vk::UniqueSurfaceKHR Platform::CreateVulkanSurfaceForWindow(const vk::Instance& instance, const Methane::Platform::AppEnvironment& env)
 {
     META_FUNCTION_TASK();
