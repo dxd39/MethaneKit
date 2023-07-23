@@ -46,25 +46,12 @@ Vulkan implementation of the device interface.
 namespace Methane::Graphics::Vulkan
 {
 
-// Google extensions are used to reflect HLSL semantic names from shader input decorations,
-// and it works fine, but is not listed by Windows NVidia drivers, who knows why?
-//#ifdef __linux__
-//#define VK_GOOGLE_SPIRV_EXTENSIONS_ENABLED
-//#endif
-
 #define VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME "VK_KHR_portability_subset"
 
 static const std::vector<std::string_view> g_common_device_extensions{
     VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
 #ifdef METHANE_GPU_INSTRUMENTATION_ENABLED
     VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME,
-#endif
-#ifndef __APPLE__
-    VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
-#endif
-#ifdef VK_GOOGLE_SPIRV_EXTENSIONS_ENABLED
-    VK_GOOGLE_HLSL_FUNCTIONALITY1_EXTENSION_NAME,
-    VK_GOOGLE_USER_TYPE_EXTENSION_NAME,
 #endif
 };
 
@@ -214,8 +201,8 @@ void QueueFamilyReservation::IncrementQueuesCount(uint32_t extra_queues_count) n
 
 Device::Device(const vk::PhysicalDevice& vk_physical_device, const vk::SurfaceKHR& vk_surface, const Capabilities& capabilities)
     : Base::Device(vk_physical_device.getProperties().deviceName,
-                 IsSoftwarePhysicalDevice(vk_physical_device),
-                 capabilities)
+                   IsSoftwarePhysicalDevice(vk_physical_device),
+                   capabilities)
     , m_vk_physical_device(vk_physical_device)
     , m_supported_extension_names_storage(GetDeviceSupportedExtensionNames(vk_physical_device))
     , m_supported_extension_names_set(m_supported_extension_names_storage.begin(), m_supported_extension_names_storage.end())
@@ -273,18 +260,19 @@ Device::Device(const vk::PhysicalDevice& vk_physical_device, const vk::SurfaceKH
     vk_device_features.imageCubeArray    = capabilities.features.HasBit(Rhi::DeviceFeature::ImageCubeArray);
 
     // Add descriptions of enabled device features:
-    vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT vk_device_dynamic_state_feature(true);
+    vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT vk_device_dynamic_state_feature(m_is_dynamic_state_supported);
     vk::PhysicalDeviceTimelineSemaphoreFeaturesKHR    vk_device_timeline_semaphores_feature(true);
     vk::PhysicalDeviceHostQueryResetFeatures          vk_device_host_query_reset_feature(true);
-    vk::DeviceCreateInfo vk_device_info(vk::DeviceCreateFlags{}, vk_queue_create_infos, { }, raw_enabled_extension_names, &vk_device_features);
+    vk::DeviceCreateInfo vk_device_info(
+        vk::DeviceCreateFlags{},
+        vk_queue_create_infos,
+        { },
+        raw_enabled_extension_names,
+        &vk_device_features
+    );
     vk_device_info.setPNext(&vk_device_dynamic_state_feature);
     vk_device_dynamic_state_feature.setPNext(&vk_device_timeline_semaphores_feature);
     vk_device_timeline_semaphores_feature.setPNext(&vk_device_host_query_reset_feature);
-
-#ifndef __APPLE__
-    vk::PhysicalDeviceSynchronization2FeaturesKHR vk_device_synchronization_2_feature(true);
-    vk_device_host_query_reset_feature.setPNext(&vk_device_synchronization_2_feature);
-#endif
 
     m_vk_unique_device = vk_physical_device.createDeviceUnique(vk_device_info);
     VULKAN_HPP_DEFAULT_DISPATCHER.init(m_vk_unique_device.get());
