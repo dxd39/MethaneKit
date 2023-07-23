@@ -270,8 +270,16 @@ Device::Device(const vk::PhysicalDevice& vk_physical_device, const vk::SurfaceKH
         raw_enabled_extension_names,
         &vk_device_features
     );
-    vk_device_info.setPNext(&vk_device_dynamic_state_feature);
-    vk_device_dynamic_state_feature.setPNext(&vk_device_timeline_semaphores_feature);
+
+    if (m_is_dynamic_state_supported)
+    {
+        vk_device_info.setPNext(&vk_device_dynamic_state_feature);
+        vk_device_dynamic_state_feature.setPNext(&vk_device_timeline_semaphores_feature);
+    }
+    else 
+    {
+        vk_device_info.setPNext(&vk_device_timeline_semaphores_feature);
+    }
     vk_device_timeline_semaphores_feature.setPNext(&vk_device_host_query_reset_feature);
 
     m_vk_unique_device = vk_physical_device.createDeviceUnique(vk_device_info);
