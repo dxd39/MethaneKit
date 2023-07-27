@@ -25,10 +25,13 @@ Vulkan implementation of the render state interface.
 
 #include <Methane/Graphics/RHI/IViewState.h>
 #include <Methane/Graphics/Base/RenderState.h>
+#include <Methane/Data/Receiver.hpp>
+#include <Methane/Instrumentation.h>
 
 #include <vulkan/vulkan.hpp>
 
 #include <map>
+#include <mutex>
 
 namespace Methane::Graphics::Rhi
 {
@@ -45,9 +48,12 @@ namespace Methane::Graphics::Vulkan
 
 struct IContext;
 class ViewState;
+class RenderContext;
 
 class RenderState final
     : public Base::RenderState
+    , private Data::Receiver<Rhi::IViewStateCallback>
+
 {
 public:
     static vk::PrimitiveTopology GetVulkanPrimitiveTopology(Rhi::RenderPrimitive primitive_type);
@@ -65,18 +71,23 @@ public:
 
     bool                IsNativePipelineDynamic() const noexcept  { return !Base::RenderState::IsDeferred(); }
     const vk::Pipeline& GetNativePipelineDynamic() const;
-    const vk::Pipeline& GetNativePipelineMonolithic(const ViewState& viewState, Rhi::RenderPrimitive renderPrimitive);
+    const vk::Pipeline& GetNativePipelineMonolithic(ViewState& viewState, Rhi::RenderPrimitive renderPrimitive);
     const vk::Pipeline& GetNativePipelineMonolithic(const Base::RenderDrawingState& drawing_state);
 
 private:
-    vk::UniquePipeline CreateNativePipeline(const ViewState* viewState = nullptr, Opt<Rhi::RenderPrimitive> renderPrimitive = {});
+    vk::UniquePipeline CreateNativePipeline(const ViewState* viewState = nullptr, Opt<Rhi::RenderPrimitive> renderPrimitive = {}) const;
 
-    using PipelineId = std::tuple<Rhi::ViewSettings, Rhi::RenderPrimitive>;
+    // IViewStateCallback overrides
+    void OnViewStateChanged(Rhi::IViewState& view_state) override;
+    void OnViewStateDestroyed(Rhi::IViewState& view_state) override;
+
+    using PipelineId = std::tuple<Rhi::IViewState*, Rhi::RenderPrimitive>;
     using MonolithicPipelineById = std::map<PipelineId, vk::UniquePipeline>;
 
-    const IContext&        m_vk_context;
-    vk::UniquePipeline     m_vk_pipeline_dynamic;
-    MonolithicPipelineById m_vk_pipeline_monolithic_by_id;
+    const RenderContext&      m_vk_render_context;
+    vk::UniquePipeline        m_vk_pipeline_dynamic;
+    MonolithicPipelineById    m_vk_pipeline_monolithic_by_id;
+    TracyLockable(std::mutex, m_mutex);
 };
 
 } // namespace Methane::Graphics::Vulkan
