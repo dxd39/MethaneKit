@@ -32,7 +32,7 @@ const std::vector<std::string_view>& Platform::GetVulkanInstanceRequiredLayers()
 {
     META_FUNCTION_TASK();
     static const std::vector<std::string_view> s_instance_layers = {
-        "VK_LAYER_KHRONOS_synchronization2",
+        //"VK_LAYER_KHRONOS_synchronization2",
         "VK_LAYER_KHRONOS_timeline_semaphore"
     };
     return s_instance_layers;
