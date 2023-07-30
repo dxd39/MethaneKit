@@ -6,6 +6,12 @@ set(METHANE_VERSION_MINOR 7 CACHE STRING "Methane minor version")
 set(METHANE_VERSION_PATCH 2 CACHE STRING "Methane patch version")
 set(METHANE_VERSION_BUILD 0 CACHE STRING "Methane build version")
 
+# fix building android on macos 
+if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    set(ANDROID On)
+    set(APPLE Off)
+endif()
+
 # Define CMake languages list
 list(APPEND METHANE_LANGUAGES CXX C)
 if(APPLE)
