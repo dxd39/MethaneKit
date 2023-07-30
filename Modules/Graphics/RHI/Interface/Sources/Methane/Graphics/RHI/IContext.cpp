@@ -29,7 +29,11 @@ namespace Methane::Graphics::Rhi
 
 ICommandKit& IContext::GetUploadCommandKit() const
 {
+#ifndef ANDROID
     return GetDefaultCommandKit(CommandListType::Transfer);
+#else
+    return GetDefaultCommandKit(CommandListType::Render);
+#endif
 }
 
 } // namespace Methane::Graphics::Rhi

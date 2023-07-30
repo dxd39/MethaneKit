@@ -220,7 +220,9 @@ Device::Device(const vk::PhysicalDevice& vk_physical_device, const vk::SurfaceKH
 
     ReserveQueueFamily(Rhi::CommandListType::Render,   capabilities.render_queues_count,   reserved_queues_count_per_family,
                        capabilities.features.HasBit(Rhi::DeviceFeature::PresentToWindow) ? vk_surface : vk::SurfaceKHR());
+#ifndef ANDROID
     ReserveQueueFamily(Rhi::CommandListType::Transfer, capabilities.transfer_queues_count, reserved_queues_count_per_family);
+#endif
     ReserveQueueFamily(Rhi::CommandListType::Compute,  capabilities.compute_queues_count,  reserved_queues_count_per_family);
 
     std::vector<vk::DeviceQueueCreateInfo> vk_queue_create_infos;
