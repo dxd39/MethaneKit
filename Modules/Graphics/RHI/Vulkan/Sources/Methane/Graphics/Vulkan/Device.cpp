@@ -220,10 +220,17 @@ Device::Device(const vk::PhysicalDevice& vk_physical_device, const vk::SurfaceKH
 
     ReserveQueueFamily(Rhi::CommandListType::Render,   capabilities.render_queues_count,   reserved_queues_count_per_family,
                        capabilities.features.HasBit(Rhi::DeviceFeature::PresentToWindow) ? vk_surface : vk::SurfaceKHR());
-#ifndef ANDROID
-    ReserveQueueFamily(Rhi::CommandListType::Transfer, capabilities.transfer_queues_count, reserved_queues_count_per_family);
-#endif
     ReserveQueueFamily(Rhi::CommandListType::Compute,  capabilities.compute_queues_count,  reserved_queues_count_per_family);
+    // For transfer, try to find a queue which supports transfer.
+    // If not, fallback to same queue as compute. £¨Integrated graphics cards usually do not support)
+    try
+    {
+        ReserveQueueFamily(Rhi::CommandListType::Transfer, capabilities.transfer_queues_count, reserved_queues_count_per_family);
+    }
+    catch (const std::exception&)
+    {
+        m_queue_family_reservation_by_type.try_emplace(Rhi::CommandListType::Transfer, m_queue_family_reservation_by_type[Rhi::CommandListType::Compute]);
+    }
 
     std::vector<vk::DeviceQueueCreateInfo> vk_queue_create_infos;
     std::set<QueueFamilyReservation*> unique_family_reservation_ptrs;
