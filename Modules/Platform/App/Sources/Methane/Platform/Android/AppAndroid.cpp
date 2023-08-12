@@ -189,7 +189,15 @@ void AppAndroid::HandleCmd(android_app* app, int32_t cmd)
         kit->m_is_active = false;
         break;
     case APP_CMD_WINDOW_RESIZED:
+    {
+        // now has bug here
+        /*const Data::FrameSize frame_size(
+            static_cast<uint32_t>(ANativeWindow_getWidth(app->window)),
+            static_cast<uint32_t>(ANativeWindow_getHeight(app->window))
+        );
+        kit->Resize(frame_size, false);*/
         break;
+    }
     case APP_CMD_WINDOW_REDRAW_NEEDED:
         break;
     case APP_CMD_CONTENT_RECT_CHANGED:
