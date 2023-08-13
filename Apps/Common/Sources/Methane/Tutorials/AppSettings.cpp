@@ -33,9 +33,9 @@ AppOptions::Mask AppOptions::GetDefaultWithColorOnly() noexcept
 {
     AppOptions::Mask options;
     options |= AppOptions::Bit::ClearColor;
-#ifdef __APPLE__
+#if (defined __APPLE__) || (defined __ANDROID__)
     options |= AppOptions::Bit::VSync;
-#ifndef APPLE_MACOS // iOS
+#ifndef APPLE_MACOS // mobile platform(ios and android)
     options |= AppOptions::Bit::FullScreen;
     options |= AppOptions::Bit::HudVisible;
 #endif

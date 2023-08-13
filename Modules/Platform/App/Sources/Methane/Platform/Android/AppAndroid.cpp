@@ -119,12 +119,16 @@ bool AppAndroid::SetFullScreen(bool is_full_screen)
 
 float AppAndroid::GetContentScalingFactor() const
 {
-    return 0.0f;
+    if (m_android_app)
+    {
+        return AConfiguration_getDensity(m_android_app->config) / static_cast<float>(ACONFIGURATION_DENSITY_MEDIUM);
+    }
+    return 1.0f;
 }
 
 uint32_t AppAndroid::GetFontResolutionDpi() const
 {
-    return 0;
+    return 72U * GetContentScalingFactor();
 }
 
 void AppAndroid::Close()
