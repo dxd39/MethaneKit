@@ -78,7 +78,7 @@ int AppAndroid::Run(const RunArgs& args)
 
         HandleEvent(app);
 
-        if (m_env.window)
+        if (m_is_active)
         {
             // If there's a deferred message, schedule it to show for the current window event loop
             if (HasDeferredMessage())
@@ -170,65 +170,88 @@ void AppAndroid::HandleCmd(android_app* app, int32_t cmd)
     {
     case APP_CMD_INIT_WINDOW:
     {
+        META_LOG("app state changed: APP_CMD_INIT_WINDOW");
+
         kit->m_env.window = app->window;
+        if (!kit->IsInitialized())
+        {
+            const Data::FrameSize frame_size(
+                static_cast<uint32_t>(ANativeWindow_getWidth(app->window)),
+                static_cast<uint32_t>(ANativeWindow_getHeight(app->window))
+            );
+
+            // Application Initialization
+            if (kit->InitContextWithErrorHandling(kit->m_env, frame_size)
+                && kit->InitWithErrorHandling())
+            {
+                kit->m_is_active = true;
+            }
+        }
+        else 
+        {
+            kit->Resume(kit->m_env);
+            kit->m_is_active = true;
+        }
+        
+        break;
+    }
+    case APP_CMD_TERM_WINDOW:
+    {
+        META_LOG("app state changed: APP_CMD_TERM_WINDOW");
+        kit->m_is_active = false;
+        break;
+    }
+    case APP_CMD_WINDOW_RESIZED:
+    {
+        META_LOG("app state changed: APP_CMD_WINDOW_RESIZED");
+        // now has bug here
         const Data::FrameSize frame_size(
             static_cast<uint32_t>(ANativeWindow_getWidth(app->window)),
             static_cast<uint32_t>(ANativeWindow_getHeight(app->window))
         );
-
-        // Application Initialization
-        if (kit->InitContextWithErrorHandling(kit->m_env, frame_size)
-            && kit->InitWithErrorHandling())
-        {
-            kit->m_is_active = true;
-        }
-        break;
-    }
-    case APP_CMD_TERM_WINDOW:
-        kit->m_env.window = nullptr;
-        kit->m_is_active = false;
-        break;
-    case APP_CMD_WINDOW_RESIZED:
-    {
-        // now has bug here
-        /*const Data::FrameSize frame_size(
-            static_cast<uint32_t>(ANativeWindow_getWidth(app->window)),
-            static_cast<uint32_t>(ANativeWindow_getHeight(app->window))
-        );
-        kit->Resize(frame_size, false);*/
+        kit->Resize(frame_size, false);
         break;
     }
     case APP_CMD_WINDOW_REDRAW_NEEDED:
+        META_LOG("app state changed: APP_CMD_WINDOW_REDRAW_NEEDED");
         break;
     case APP_CMD_CONTENT_RECT_CHANGED:
+        META_LOG("app state changed: APP_CMD_CONTENT_RECT_CHANGED");
         // Get the new size
         break;
     case APP_CMD_GAINED_FOCUS:
-        kit->m_is_active = true;
+        META_LOG("app state changed: APP_CMD_GAINED_FOCUS");
         break;
     case APP_CMD_LOST_FOCUS:
-        kit->m_is_active = false;
+        META_LOG("app state changed: APP_CMD_LOST_FOCUS");
         break;
     case APP_CMD_CONFIG_CHANGED:
+        META_LOG("app state changed: APP_CMD_CONFIG_CHANGED");
         break;
     case APP_CMD_LOW_MEMORY:
+        META_LOG("app state changed: APP_CMD_LOW_MEMORY");
         break;
     case APP_CMD_START:
-        kit->m_is_active = true;
+        META_LOG("app state changed: APP_CMD_START");
         break;
     case APP_CMD_RESUME:
-        kit->m_is_active = true;
+        META_LOG("app state changed: APP_CMD_RESUME");
         break;
     case APP_CMD_SAVE_STATE:
+        META_LOG("app state changed: APP_CMD_SAVE_STATE");
         break;
     case APP_CMD_PAUSE:
+        META_LOG("app state changed: APP_CMD_PAUSE");
         kit->m_is_active = false;
         break;
     case APP_CMD_STOP:
+        META_LOG("app state changed: APP_CMD_STOP");
         break;
     case APP_CMD_DESTROY:
+        META_LOG("app state changed: APP_CMD_DESTROY");
         break;
     case APP_CMD_WINDOW_INSETS_CHANGED:
+        META_LOG("app state changed: APP_CMD_WINDOW_INSETS_CHANGED");
         break;
     default:
         break;

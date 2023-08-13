@@ -124,6 +124,7 @@ public:
     [[nodiscard]] META_PIMPL_API bool ReadyToRender() const;
     META_PIMPL_API void Resize(const FrameSize& frame_size) const;
     META_PIMPL_API void Present() const;
+    META_PIMPL_API void Resume(const Platform::AppEnvironment& env) const;
     [[nodiscard]] META_PIMPL_API Platform::AppView GetAppView() const;
     [[nodiscard]] META_PIMPL_API const Settings&   GetSettings() const META_PIMPL_NOEXCEPT;
     [[nodiscard]] META_PIMPL_API uint32_t          GetFrameBufferIndex() const META_PIMPL_NOEXCEPT;

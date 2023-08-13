@@ -64,6 +64,7 @@ public:
     bool Update() override;
     bool Render() override;
     bool SetFullScreen(bool is_full_screen) override;
+    void Resume(const Platform::AppEnvironment& env) override;
 
     void SetShowHudInWindowTitle(bool show_hud_in_window_title);
 

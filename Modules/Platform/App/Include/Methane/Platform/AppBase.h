@@ -88,6 +88,7 @@ public:
     const Data::FrameSize&  GetFrameSize() const noexcept           { return m_frame_size; }
     bool                    IsMinimized() const noexcept            { return m_is_minimized; }
     bool                    IsResizing() const noexcept             { return m_is_resizing; }
+    bool                    IsInitialized() const noexcept          { return m_initialized; }
     bool                    HasKeyboardFocus() const noexcept       { return m_has_keyboard_focus; }
     bool                    HasError() const noexcept;
 

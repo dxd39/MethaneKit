@@ -190,6 +190,16 @@ void RenderContext::Present()
     UpdateFrameBufferIndex();
 }
 
+void RenderContext::Resume(const Methane::Platform::AppEnvironment& app_env)
+{
+    m_app_env = app_env;
+    auto native_instance = static_cast<System&>(Rhi::ISystem::Get()).GetNativeInstance();
+    native_instance.destroySurfaceKHR(m_vk_unique_surface.get(), nullptr);
+    m_vk_unique_surface.release();
+    m_vk_unique_surface = Platform::CreateVulkanSurfaceForWindow(native_instance, app_env);
+    ResetNativeSwapchain();
+}
+
 #ifndef __APPLE__
 
 bool RenderContext::SetVSyncEnabled(bool vsync_enabled)
@@ -388,6 +398,13 @@ void RenderContext::InitializeNativeSwapchain()
         image_count = swap_chain_support.capabilities.maxImageCount;
     }
 
+    // resume 
+    if (m_last_request_image_count > swap_chain_support.capabilities.minImageCount)
+    {
+        image_count = m_last_request_image_count;
+    }
+    m_last_request_image_count = image_count;
+
     m_vk_unique_swapchain = m_vk_device.createSwapchainKHRUnique(
         vk::SwapchainCreateInfoKHR(
             vk::SwapchainCreateFlagsKHR(),
@@ -409,6 +426,7 @@ void RenderContext::InitializeNativeSwapchain()
     m_vk_frame_format = swap_surface_format.format;
     m_vk_frame_extent = swap_extent;
 
+    // if we ask for `VK_PRESENT_MODE_MAILBOX_KHR` we may get more images than `minImageCount`, typically 4
     if (m_vk_frame_images.size() != GetSettings().frame_buffers_count)
         InvalidateFrameBuffersCount(static_cast<uint32_t>(m_vk_frame_images.size()));
 

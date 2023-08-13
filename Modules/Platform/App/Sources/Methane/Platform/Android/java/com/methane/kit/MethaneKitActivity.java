@@ -39,7 +39,7 @@ public class MethaneKitActivity extends GameActivity {
     
      static {
         // Load native library
-        System.loadLibrary("MethaneHelloTriangle");
+        System.loadLibrary("MethaneTexturedCube");
     }
 
     @Override
@@ -64,7 +64,7 @@ public class MethaneKitActivity extends GameActivity {
         }
     }
 
-    private Semaphore semaphore = new Semaphore(1);
+    private final Semaphore semaphore = new Semaphore(1);
 
     // This function will be called from C++ by name and signature
     public void showAlert(final String title, final String message) {

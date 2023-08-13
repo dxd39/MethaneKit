@@ -264,6 +264,12 @@ bool AppBase::SetFullScreen(bool is_full_screen)
     return Platform::App::SetFullScreen(is_full_screen);
 }
 
+void AppBase::Resume(const Platform::AppEnvironment& env)
+{
+    if (m_context.IsInitialized())
+        m_context.Resume(env);
+}
+
 // Graphics::IApp interface
 
 bool AppBase::SetBaseAnimationsEnabled(bool animations_enabled)

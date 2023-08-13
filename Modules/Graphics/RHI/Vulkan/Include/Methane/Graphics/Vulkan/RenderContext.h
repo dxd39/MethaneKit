@@ -71,6 +71,7 @@ public:
     bool     ReadyToRender() const override;
     void     Resize(const FrameSize& frame_size) override;
     void     Present() override;
+    void     Resume(const Methane::Platform::AppEnvironment& app_env) override;
     bool     SetVSyncEnabled(bool vsync_enabled) override;
     bool     SetFrameBuffersCount(uint32_t frame_buffers_count) override;
     Methane::Platform::AppView GetAppView() const override { return { }; }
@@ -121,7 +122,7 @@ private:
     const AppViewMetal* m_metal_view;
 #endif
 
-    const Methane::Platform::AppEnvironment m_app_env;
+    Methane::Platform::AppEnvironment       m_app_env;
     const vk::Device                        m_vk_device;
     vk::UniqueSurfaceKHR                    m_vk_unique_surface;
     vk::UniqueSwapchainKHR                  m_vk_unique_swapchain;
@@ -131,6 +132,7 @@ private:
     std::vector<FrameSync>                  m_frame_sync_pool;
     std::vector<vk::Semaphore>              m_vk_frame_image_available_semaphores;
     mutable std::deque<vk::UniquePipeline>  m_vk_deferred_release_pipelines;
+    uint32_t                                m_last_request_image_count = 0;
 };
 
 } // namespace Methane::Graphics::Vulkan

@@ -251,7 +251,14 @@ void TexturedCubeApp::OnContextReleased(rhi::IContext& context)
 
 } // namespace Methane::Tutorials
 
+# ifdef __ANDROID__
+extern "C" void android_main(struct android_app* app)
+{
+    Methane::Tutorials::TexturedCubeApp().Run({ app });
+}
+# else
 int main(int argc, const char* argv[])
 {
     return Methane::Tutorials::TexturedCubeApp().Run({ argc, argv });
 }
+# endif
