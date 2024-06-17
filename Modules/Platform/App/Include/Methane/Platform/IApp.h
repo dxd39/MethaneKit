@@ -104,7 +104,6 @@ public:
     virtual float    GetContentScalingFactor() const = 0;
     virtual uint32_t GetFontResolutionDpi() const = 0;
     virtual void     Close() = 0;
-    virtual void     Resume(const AppEnvironment& env) = 0;
     virtual ~IApp() = default;
 
 };

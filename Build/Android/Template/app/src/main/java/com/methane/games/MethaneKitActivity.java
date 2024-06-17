@@ -84,7 +84,8 @@ public class MethaneKitActivity extends GameActivity {
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("showAlert error: " + e.getMessage());
         }
     }
 }

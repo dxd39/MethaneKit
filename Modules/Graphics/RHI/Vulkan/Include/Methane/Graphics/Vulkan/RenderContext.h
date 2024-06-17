@@ -71,7 +71,6 @@ public:
     bool     ReadyToRender() const override;
     void     Resize(const FrameSize& frame_size) override;
     void     Present() override;
-    void     Resume(const Methane::Platform::AppEnvironment& app_env) override;
     bool     SetVSyncEnabled(bool vsync_enabled) override;
     bool     SetFrameBuffersCount(uint32_t frame_buffers_count) override;
     Methane::Platform::AppView GetAppView() const override { return { }; }

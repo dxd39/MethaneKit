@@ -21,12 +21,12 @@ android {
     ndkVersion '25.2.9519653'
     
     defaultConfig {
-        applicationId 'com.methanekit.app'
+        applicationId 'com.methane.games'
         minSdk 29
-        targetSdk 34
+        targetSdk 33
         externalNativeBuild {
             cmake {
-                abiFilters.addAll( 'arm64-v8a', 'x86_64' )
+                abiFilters.addAll( 'arm64-v8a' )
                 arguments "-DANDROID_STL=c++_shared","-DMETHANE_LOGGING_ENABLED=ON"
                 targets "MethaneTexturedCube"
             }
@@ -47,7 +47,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = ['../../../../Modules/Platform/App/Sources/Methane/Platform/Android/java']
+            java.srcDirs = ['src/main/java']
         }
     }
 
@@ -62,7 +62,7 @@ android {
         prefab true
     }
     
-    namespace 'com.methane.kit'
+    namespace 'com.methane.games'
 }
 
 dependencies {

@@ -248,11 +248,6 @@ void RenderContext::Present() const
     GetImpl(m_impl_ptr).Present();
 }
 
-void RenderContext::Resume(const Platform::AppEnvironment& env) const
-{
-    GetImpl(m_impl_ptr).Resume(env);
-}
-
 Platform::AppView RenderContext::GetAppView() const
 {
     return GetImpl(m_impl_ptr).GetAppView();

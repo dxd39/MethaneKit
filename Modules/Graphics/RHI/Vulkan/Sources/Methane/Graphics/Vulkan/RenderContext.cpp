@@ -191,16 +191,6 @@ void RenderContext::Present()
     UpdateFrameBufferIndex();
 }
 
-void RenderContext::Resume(const Methane::Platform::AppEnvironment& app_env)
-{
-    m_app_env = app_env;
-    auto native_instance = static_cast<System&>(Rhi::ISystem::Get()).GetNativeInstance();
-    native_instance.destroySurfaceKHR(m_vk_unique_surface.get(), nullptr);
-    m_vk_unique_surface.release();
-    m_vk_unique_surface = Platform::CreateVulkanSurfaceForWindow(native_instance, app_env);
-    ResetNativeSwapchain();
-}
-
 #ifndef __APPLE__
 
 bool RenderContext::SetVSyncEnabled(bool vsync_enabled)
