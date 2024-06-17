@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.methane.kit;
+package com.methane.games;
 
 import android.app.AlertDialog;
 import android.app.PendingIntent;
